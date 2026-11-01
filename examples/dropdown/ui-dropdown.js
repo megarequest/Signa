@@ -12,7 +12,7 @@
  *
  * События: "dropdown:open", "dropdown:close" на самом элементе.
  */
-Plainly.defineComponent('ui-dropdown', ({ html, signal, effect, prop, slot, $this }) => {
+Signa.defineComponent('ui-dropdown', ({ html, signal, effect, prop, slot, $this }) => {
     const align = prop('align', String, 'start');
     const hover = prop('hover', Boolean, false);
     const keepOpen = prop('keepOpen', Boolean, false);

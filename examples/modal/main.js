@@ -1,7 +1,7 @@
-const { defineComponent } = window.Plainly;
+const { defineComponent } = window.Signa;
 
-const modals = Plainly.store('modals');
-const toasts = Plainly.store('toasts');
+const modals = Signa.store('modals');
+const toasts = Signa.store('toasts');
 
 
 // --- окна из разметки + обычный JS ---

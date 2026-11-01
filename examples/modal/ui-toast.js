@@ -1,7 +1,7 @@
 /**
  * Всплывающие уведомления.
  *
- *   const toasts = Plainly.store('toasts')
+ *   const toasts = Signa.store('toasts')
  *   toasts.show('Готово')
  *   toasts.success('Сохранено')
  *   toasts.error('Не удалось', { timeout: 0 })   // 0 — пока не закроют вручную
@@ -9,7 +9,7 @@
  * Контейнер <ui-toasts> создаётся сам при первом вызове.
  */
 
-Plainly.defineStore('toasts', ({ signal }) => {
+Signa.defineStore('toasts', ({ signal }) => {
     const list = signal([]);
 
     let seq = 0;
@@ -53,7 +53,7 @@ Plainly.defineStore('toasts', ({ signal }) => {
 });
 
 
-Plainly.defineComponent('ui-toasts', ({ html }, { toasts }) => {
+Signa.defineComponent('ui-toasts', ({ html }, { toasts }) => {
     const icons = { info: 'ℹ', success: '✓', error: '!' };
 
     return () => html`

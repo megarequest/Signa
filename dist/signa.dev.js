@@ -885,7 +885,7 @@
       try {
         cleanup();
       } catch (e2) {
-        console.error("[Plainly] cleanup error:", e2);
+        console.error("[Signa] cleanup error:", e2);
       }
     }
   }
@@ -901,7 +901,7 @@
   function defineStore(name, factory) {
     if (registry.has(name)) {
       throw new Error(
-        true ? `[Plainly] store "${name}" is already defined` : name
+        true ? `[Signa] store "${name}" is already defined` : name
       );
     }
     registry.set(name, {
@@ -915,7 +915,7 @@
     const entry = registry.get(name);
     if (!entry) {
       throw new Error(
-        true ? `[Plainly] store "${name}" is not defined` : name
+        true ? `[Signa] store "${name}" is not defined` : name
       );
     }
     if (entry._ready) {
@@ -923,7 +923,7 @@
     }
     if (entry._resolving) {
       throw new Error(
-        true ? `[Plainly] circular dependency: "${name}"` : name
+        true ? `[Signa] circular dependency: "${name}"` : name
       );
     }
     entry._resolving = true;
@@ -993,7 +993,7 @@
         return n2;
       }
       if (true) {
-        console.warn(`[Plainly] cannot parse "${value}" as Number`);
+        console.warn(`[Signa] cannot parse "${value}" as Number`);
       }
       return 0;
     }
@@ -1033,7 +1033,7 @@
     }
     set value(_2) {
       if (true) {
-        console.warn(`[Plainly] prop "${this._key}" is read-only`);
+        console.warn(`[Signa] prop "${this._key}" is read-only`);
       }
     }
     peek() {
@@ -1043,7 +1043,7 @@
   function defineComponent(tagName, setup) {
     if (customElements.get(tagName)) {
       throw new Error(
-        true ? `[Plainly] <${tagName}> is already defined` : tagName
+        true ? `[Signa] <${tagName}> is already defined` : tagName
       );
     }
     class Component extends HTMLElement {
@@ -1141,7 +1141,7 @@
           });
         } catch (e2) {
           console.error(
-            `[Plainly] error mounting <${tagName}>:`,
+            `[Signa] error mounting <${tagName}>:`,
             e2
           );
           this.#teardown();
@@ -1207,7 +1207,7 @@
 
   // src/index.js
   ext.bus = bus;
-  var Plainly = {
+  var Signa = {
     defineComponent,
     defineStore,
     store,
@@ -1221,7 +1221,7 @@
     // поля, которые аддоны добавляют в контекст компонентов и сторов
     ctx: ext
   };
-  window.Plainly = Plainly;
+  window.Signa = Signa;
 
   // src/location.js
   function parseQuery(search = window.location.search) {
@@ -1426,14 +1426,14 @@
       const r2 = routeMap[name];
       if (!r2) {
         throw new Error(
-          true ? `[Plainly] route "${name}" not found` : name
+          true ? `[Signa] route "${name}" not found` : name
         );
       }
       let path2 = r2.path;
       for (const key of r2.keys) {
         if (!(key in params)) {
           throw new Error(
-            true ? `[Plainly] missing param "${key}" for route "${name}"` : key
+            true ? `[Signa] missing param "${key}" for route "${name}"` : key
           );
         }
         path2 = path2.replace(
@@ -1461,8 +1461,8 @@
   }
 
   // src/addon.js
-  var Plainly2 = window.Plainly;
-  Plainly2.location = Plainly2.ctx.location = location;
-  Plainly2.router = createRouter;
+  var Signa2 = window.Signa;
+  Signa2.location = Signa2.ctx.location = location;
+  Signa2.router = createRouter;
 })();
-//# sourceMappingURL=plainly.dev.js.map
+//# sourceMappingURL=signa.dev.js.map

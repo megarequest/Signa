@@ -1,4 +1,4 @@
-const { defineComponent } = window.Plainly;
+const { defineComponent } = window.Signa;
 
 
 // способ 1: функция доступа из defineStore
@@ -52,7 +52,7 @@ defineComponent('product-list', ({ html }, { products, cart }) => {
 
 // способ 3: по имени
 defineComponent('cart-badge', ({ html }) => {
-    const cart = Plainly.store('cart');
+    const cart = Signa.store('cart');
 
     return () => html`<span class="badge">🛒 ${cart.count.value}</span>`;
 });

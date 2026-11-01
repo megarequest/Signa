@@ -1,7 +1,7 @@
 import { computed } from '@preact/signals-core';
 import { location } from './location.js';
 
-// Роутер не слушает браузер сам: путь берётся из реактивного Plainly.location
+// Роутер не слушает браузер сам: путь берётся из реактивного Signa.location
 export function createRouter(routes, { mode = 'hash' } = {}) {
     const hashMode = mode === 'hash';
 
@@ -92,7 +92,7 @@ export function createRouter(routes, { mode = 'hash' } = {}) {
 
         if (!r) {
             throw new Error(
-                __DEV__ ? `[Plainly] route "${name}" not found` : name
+                __DEV__ ? `[Signa] route "${name}" not found` : name
             );
         }
 
@@ -102,7 +102,7 @@ export function createRouter(routes, { mode = 'hash' } = {}) {
             if (!(key in params)) {
                 throw new Error(
                     __DEV__
-                        ? `[Plainly] missing param "${key}" for route "${name}"`
+                        ? `[Signa] missing param "${key}" for route "${name}"`
                         : key
                 );
             }

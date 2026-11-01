@@ -4,10 +4,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plainly Select</title>
+    <title>Signa Select</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="ui-select.css">
-    <script src="../../dist/plainly.core.min.js"></script>
+    <script src="../../dist/signa.core.min.js"></script>
     <script src="ui-select.js"></script>
 </head>
 
@@ -124,7 +124,7 @@
                     { value: 'bmw', label: 'BMW' },
                 ];
 
-                Plainly.defineComponent('car-picker', ({ html, signal, computed }) => {
+                Signa.defineComponent('car-picker', ({ html, signal, computed }) => {
                     const brand = signal(null);
                     const model = signal(null);
 

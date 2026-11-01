@@ -19,7 +19,7 @@
  *
  * Событие "change" с detail: { value, option } — удобно из обычного JS.
  */
-Plainly.defineComponent('ui-select', ({ html, signal, computed, effect, prop, slot, $this }) => {
+Signa.defineComponent('ui-select', ({ html, signal, computed, effect, prop, slot, $this }) => {
     const name = prop('name', String, '');
     const placeholder = prop('placeholder', String, 'Выберите…');
     const search = prop('search', Boolean, false);

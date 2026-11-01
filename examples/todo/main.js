@@ -1,4 +1,4 @@
-const { defineComponent, signal, effect } = window.Plainly;
+const { defineComponent, signal, effect } = window.Signa;
 
 
 // Composable — обычная функция. Вызванный внутри setup, effect
@@ -14,8 +14,8 @@ function useStoredSignal(key, initial) {
 
 
 defineComponent('todo-app', ({ html, computed, location }) => {
-    const todos = useStoredSignal('plainly-todos', [
-        { id: 1, text: 'Подключить plainly.core.min.js', done: true },
+    const todos = useStoredSignal('signa-todos', [
+        { id: 1, text: 'Подключить signa.core.min.js', done: true },
         { id: 2, text: 'Объявить компонент', done: true },
         { id: 3, text: 'Выкинуть jQuery', done: false },
     ]);

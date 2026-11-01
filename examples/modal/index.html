@@ -4,12 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plainly Modals</title>
+    <title>Signa Modals</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="ui-modal.css">
     <link rel="stylesheet" href="ui-toast.css">
     <link rel="stylesheet" href="style.css">
-    <script src="../../dist/plainly.core.min.js"></script>
+    <script src="../../dist/signa.core.min.js"></script>
     <script src="ui-modal.js"></script>
     <script src="ui-toast.js"></script>
 </head>
@@ -46,7 +46,7 @@
 
                 // data-close внутри окна, Escape и клик по фону закрывают его.
                 // Из кода:
-                const modals = Plainly.store('modals');
+                const modals = Signa.store('modals');
 
                 modals.open('terms');
                 modals.close('terms');
@@ -62,7 +62,7 @@
         <details class="code">
             <summary>Код</summary>
             <script type="text/plain">
-                const modals = Plainly.store('modals');
+                const modals = Signa.store('modals');
 
                 // true / false
                 const ok = await modals.confirm('Файл будет удалён без возможности восстановления.', {
@@ -83,7 +83,7 @@
         </details>
 
         <h2>Уведомления</h2>
-        <p><code>Plainly.store('toasts').success('...')</code></p>
+        <p><code>Signa.store('toasts').success('...')</code></p>
         <div class="stage row">
             <button id="toast-info">Инфо</button>
             <button id="toast-success">Успех</button>
@@ -95,7 +95,7 @@
                 <link rel="stylesheet" href="ui-toast.css">
                 <script src="ui-toast.js"><\/script>
 
-                const toasts = Plainly.store('toasts');
+                const toasts = Signa.store('toasts');
 
                 toasts.show('Просто сообщение');
                 toasts.success('Сохранено');

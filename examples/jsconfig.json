@@ -4,5 +4,5 @@
         "lib": ["es2022", "dom"],
         "checkJs": false
     },
-    "include": ["**/*.js", "../dist/plainly.d.ts"]
+    "include": ["**/*.js", "../dist/signa.d.ts"]
 }

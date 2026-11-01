@@ -10,22 +10,22 @@ declare global {
     type ReadonlySignal<T = any> = PreactReadonlySignal<T>;
 
     /**
-     * Реестр сторов для доступа по имени: Plainly.store('cart') и ({ cart }) в setup.
+     * Реестр сторов для доступа по имени: Signa.store('cart') и ({ cart }) в setup.
      * Расширяется через declaration merging:
      *
-     *   interface PlainlyStores { cart: ReturnType<typeof useCart> }
+     *   interface SignaStores { cart: ReturnType<typeof useCart> }
      *
      * Функция, которую вернул defineStore, типизирована и без этого.
      */
-    interface PlainlyStores { }
+    interface SignaStores { }
 
-    type StoreAccess = PlainlyStores & Record<string, any>;
+    type StoreAccess = SignaStores & Record<string, any>;
 
     // ---------------------------------------------------------------
     // Bus
     // ---------------------------------------------------------------
 
-    interface PlainlyBus {
+    interface SignaBus {
         emit(type: string, payload?: any): void;
 
         /**
@@ -45,7 +45,7 @@ declare global {
         render(params: Record<string, string>): any;
     }
 
-    interface PlainlyRouter {
+    interface SignaRouter {
         current: ReadonlySignal<{
             path: string;
             params: Record<string, string>;
@@ -74,7 +74,7 @@ declare global {
         | null
         | undefined;
 
-    interface PlainlyLocation {
+    interface SignaLocation {
         current: ReadonlySignal<{
             url: string;
             path: string;
@@ -163,14 +163,14 @@ declare global {
         effect: EffectFn;
 
         html: HtmlTag;
-        bus: PlainlyBus;
+        bus: SignaBus;
 
-        /** Есть, только если подключён аддон роутера (или полный plainly.min.js). */
-        location: PlainlyLocation;
+        /** Есть, только если подключён аддон роутера (или полный signa.min.js). */
+        location: SignaLocation;
     }
 
     interface StoreContext extends BaseContext {
-        store: PlainlyCore['store'];
+        store: SignaCore['store'];
     }
 
     interface ComponentContext extends BaseContext {
@@ -188,10 +188,10 @@ declare global {
     }
 
     // ---------------------------------------------------------------
-    // Plainly
+    // Signa
     // ---------------------------------------------------------------
 
-    interface PlainlyCore {
+    interface SignaCore {
         /** Имя тега обязательно содержит дефис. */
         defineComponent(
             tagName: `${string}-${string}`,
@@ -205,7 +205,7 @@ declare global {
         ): () => T;
 
         /** Стор по имени. */
-        store<K extends keyof PlainlyStores>(name: K): PlainlyStores[K];
+        store<K extends keyof SignaStores>(name: K): SignaStores[K];
         store<T = any>(name: string): T;
 
         signal: <T>(initial?: T) => Signal<T>;
@@ -219,7 +219,7 @@ declare global {
         html: HtmlTag;
         svg: HtmlTag;
 
-        bus: PlainlyBus;
+        bus: SignaBus;
 
         /** Поля, которые аддоны добавляют в контекст компонентов и сторов. */
         ctx: Record<string, any>;
@@ -228,14 +228,14 @@ declare global {
         router(
             routes: RouteDefinition[],
             options?: { mode?: 'hash' | 'history' }
-        ): PlainlyRouter;
+        ): SignaRouter;
 
         /** Только с аддоном роутера. */
-        location: PlainlyLocation;
+        location: SignaLocation;
     }
 
-    // var, а не const: тогда доступно и как window.Plainly
-    var Plainly: PlainlyCore;
+    // var, а не const: тогда доступно и как window.Signa
+    var Signa: SignaCore;
 }
 
 export { };

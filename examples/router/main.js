@@ -1,4 +1,4 @@
-const { defineComponent, defineStore, html } = window.Plainly;
+const { defineComponent, defineStore, html } = window.Signa;
 
 const users = [
     { id: 1, name: 'Анна', role: 'дизайнер' },
@@ -7,7 +7,7 @@ const users = [
 ];
 
 const useRouter = defineStore('router', () =>
-    Plainly.router([
+    Signa.router([
         {
             name: 'home',
             path: '/',

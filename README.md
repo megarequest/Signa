@@ -1,4 +1,4 @@
-# Plainly
+# Signa
 
 Нативные веб-компоненты и сигналы для обычных HTML / PHP-сайтов. Один `<script>`, без сборки на странице, без React, Vue и jQuery.
 
@@ -9,15 +9,15 @@
 - **Сигналы** — перерисовывается только то, что прочитало изменившееся значение
 - **Пропсы из `data-*`** — смена атрибута из обычного JS перерисовывает компонент
 - **Сторы** — общее состояние между независимыми компонентами, заполняется прямо из PHP
-- **Типы** — `plainly.d.ts` для подсказок в редакторе
+- **Типы** — `signa.d.ts` для подсказок в редакторе
 
 ```html
-<script src="dist/plainly.core.min.js"></script>
+<script src="dist/signa.core.min.js"></script>
 
 <x-counter data-start="5"></x-counter>
 
 <script>
-    Plainly.defineComponent('x-counter', ({ html, signal, prop }) => {
+    Signa.defineComponent('x-counter', ({ html, signal, prop }) => {
         const count = signal(prop('start', Number, 0).peek())
 
         return () => html`
@@ -49,17 +49,17 @@
 
 | Файл | Что внутри | gzip |
 | --- | --- | --- |
-| `plainly.core.min.js` | компоненты, сторы, шина событий, сигналы | ~6.0 KB |
-| `plainly.router.min.js` | `Plainly.location` и `Plainly.router`; подключается после ядра | ~1.2 KB |
-| `plainly.min.js` | ядро и роутер одним файлом | ~6.9 KB |
-| `plainly.min.mjs` | то же как ES-модуль: `import { Plainly } from './plainly.min.mjs'` | ~6.9 KB |
-| `plainly.dev.js` | без минификации, с предупреждениями и sourcemap — для разработки | |
-| `plainly.d.ts` | типы | |
+| `signa.core.min.js` | компоненты, сторы, шина событий, сигналы | ~6.0 KB |
+| `signa.router.min.js` | `Signa.location` и `Signa.router`; подключается после ядра | ~1.2 KB |
+| `signa.min.js` | ядро и роутер одним файлом | ~6.9 KB |
+| `signa.min.mjs` | то же как ES-модуль: `import { Signa } from './signa.min.mjs'` | ~6.9 KB |
+| `signa.dev.js` | без минификации, с предупреждениями и sourcemap — для разработки | |
+| `signa.d.ts` | типы | |
 
 ```html
 <!-- только то, что нужно странице -->
-<script src="/dist/plainly.core.min.js"></script>
-<script src="/dist/plainly.router.min.js"></script>
+<script src="/dist/signa.core.min.js"></script>
+<script src="/dist/signa.router.min.js"></script>
 ```
 
 Собрать самостоятельно:
@@ -72,7 +72,7 @@ npm run build
 ## Компоненты
 
 ```js
-Plainly.defineComponent('user-card', ({ html, signal, computed, effect, prop, slot, $this, bus, location }, stores) => {
+Signa.defineComponent('user-card', ({ html, signal, computed, effect, prop, slot, $this, bus, location }, stores) => {
     const name = prop('name', String, 'Аноним')     // data-name="..."
     const open = signal(false)
 
@@ -134,7 +134,7 @@ html`<x-swatch .color=${'#0090ff'} .selected=${selectedSignal} .onPick=${pick}><
 ## Сторы
 
 ```js
-const useCart = Plainly.defineStore('cart', ({ signal, computed }) => {
+const useCart = Signa.defineStore('cart', ({ signal, computed }) => {
     const items = signal([])
     const total = computed(() => items.value.reduce((sum, item) => sum + item.price, 0))
 
@@ -150,25 +150,25 @@ const useCart = Plainly.defineStore('cart', ({ signal, computed }) => {
 
 ```js
 const cart = useCart()                                         // функция из defineStore
-Plainly.defineComponent('cart-badge', (ctx, { cart }) => ...)    // второй аргумент setup
-Plainly.store('cart')                                            // по имени, откуда угодно
+Signa.defineComponent('cart-badge', (ctx, { cart }) => ...)    // второй аргумент setup
+Signa.store('cart')                                            // по имени, откуда угодно
 ```
 
 Данные с сервера:
 
 ```php
-<script>Plainly.store('cart').items.value = <?= json_encode($items) ?></script>
+<script>Signa.store('cart').items.value = <?= json_encode($items) ?></script>
 ```
 
 ## Composable
 
-Обычные функции. `Plainly.effect`, вызванный внутри setup компонента, привязывается к нему и останавливается вместе с ним.
+Обычные функции. `Signa.effect`, вызванный внутри setup компонента, привязывается к нему и останавливается вместе с ним.
 
 ```js
 function useStoredSignal(key, initial) {
-    const value = Plainly.signal(JSON.parse(localStorage.getItem(key)) ?? initial)
+    const value = Signa.signal(JSON.parse(localStorage.getItem(key)) ?? initial)
 
-    Plainly.effect(() => localStorage.setItem(key, JSON.stringify(value.value)))
+    Signa.effect(() => localStorage.setItem(key, JSON.stringify(value.value)))
 
     return value
 }
@@ -185,10 +185,10 @@ bus.emit('message', 'привет')
 
 ## Роутер и location
 
-Нужен `plainly.router.min.js` (или полный `plainly.min.js`).
+Нужен `signa.router.min.js` (или полный `signa.min.js`).
 
 ```js
-const useRouter = Plainly.defineStore('router', ({ html }) => Plainly.router([
+const useRouter = Signa.defineStore('router', ({ html }) => Signa.router([
     { name: 'home', path: '/', render: () => html`Главная` },
     { name: 'user', path: '/users/:id', render: ({ id }) => html`Пользователь ${id}` },
     { path: '*', render: () => html`404` },
@@ -203,21 +203,21 @@ router.current.value   // { path, params, route }
 ```
 
 ```js
-Plainly.location.query.value.page    // реактивная query-строка
-Plainly.location.set('page', 2)      // null удаляет ключ; без записи в историю
-Plainly.location.push('/path')       // с записью в историю
+Signa.location.query.value.page    // реактивная query-строка
+Signa.location.set('page', 2)      // null удаляет ключ; без записи в историю
+Signa.location.push('/path')       // с записью в историю
 ```
 
 ## Глобальный API
 
-`Plainly.defineComponent`, `defineStore`, `store`, `signal`, `computed`, `effect`, `batch`, `html`, `svg`, `bus`; с аддоном — `router`, `location`.
+`Signa.defineComponent`, `defineStore`, `store`, `signal`, `computed`, `effect`, `batch`, `html`, `svg`, `bus`; с аддоном — `router`, `location`.
 
 ## Важно знать
 
-- **Несколько `<script>` делят одну глобальную область.** `const { defineComponent } = Plainly` в двух файлах — ошибка повторного объявления. Деструктурируйте в одном файле (или внутри блока `{ ... }`), а в переиспользуемых компонентах пишите `Plainly.defineComponent`.
+- **Несколько `<script>` делят одну глобальную область.** `const { defineComponent } = Signa` в двух файлах — ошибка повторного объявления. Деструктурируйте в одном файле (или внутри блока `{ ... }`), а в переиспользуемых компонентах пишите `Signa.defineComponent`.
 - **`onclick=${fn}` uhtml записывает свойством элемента**, поэтому `return false` отменяет событие (например, отправку формы). Пишите `e => { if (a) b() }`, а не `e => a && b()`.
 - **Имена родных свойств** (`title`, `id`, `hidden`…) передаются в пропсы только через `data-*`.
-- **Предупреждения** (запись в пропс, неверное значение атрибута) есть только в `plainly.dev.js`.
+- **Предупреждения** (запись в пропс, неверное значение атрибута) есть только в `signa.dev.js`.
 - **Браузеры:** Chrome / Edge 91+, Firefox 90+, Safari 15+.
 
 ## Структура

@@ -1,4 +1,4 @@
-const { defineComponent } = window.Plainly;
+const { defineComponent } = window.Signa;
 
 
 // Обычный JS: слушаем событие компонента

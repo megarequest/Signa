@@ -30,7 +30,7 @@ export function isSignal(obj) {
 export function defineStore(name, factory) {
     if (registry.has(name)) {
         throw new Error(
-            __DEV__ ? `[Plainly] store "${name}" is already defined` : name
+            __DEV__ ? `[Signa] store "${name}" is already defined` : name
         );
     }
 
@@ -48,7 +48,7 @@ export function store(name) {
 
     if (!entry) {
         throw new Error(
-            __DEV__ ? `[Plainly] store "${name}" is not defined` : name
+            __DEV__ ? `[Signa] store "${name}" is not defined` : name
         );
     }
 
@@ -58,7 +58,7 @@ export function store(name) {
 
     if (entry._resolving) {
         throw new Error(
-            __DEV__ ? `[Plainly] circular dependency: "${name}"` : name
+            __DEV__ ? `[Signa] circular dependency: "${name}"` : name
         );
     }
 

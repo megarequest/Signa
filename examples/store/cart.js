@@ -1,4 +1,4 @@
-const { defineStore } = window.Plainly;
+const { defineStore } = window.Signa;
 
 defineStore('products', ({ signal }) => ({
     list: signal([]),
@@ -7,11 +7,11 @@ defineStore('products', ({ signal }) => ({
 // глобальная переменная, чтобы main.js мог вызвать useCart()
 var useCart = defineStore('cart', ({ signal, computed, effect }) => {
     // корзина переживает перезагрузку страницы
-    const saved = JSON.parse(localStorage.getItem('plainly-cart') ?? '[]');
+    const saved = JSON.parse(localStorage.getItem('signa-cart') ?? '[]');
     const items = signal(saved);
 
     effect(() => {
-        localStorage.setItem('plainly-cart', JSON.stringify(items.value));
+        localStorage.setItem('signa-cart', JSON.stringify(items.value));
     });
 
     const count = computed(() =>

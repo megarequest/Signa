@@ -4,12 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plainly Todo</title>
+    <title>Signa Todo</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="style.css">
-    <script src="../../dist/plainly.core.min.js"></script>
-    <!-- Plainly.location -->
-    <script src="../../dist/plainly.router.min.js"></script>
+    <script src="../../dist/signa.core.min.js"></script>
+    <!-- Signa.location -->
+    <script src="../../dist/signa.router.min.js"></script>
 </head>
 
 <body>
@@ -17,7 +17,7 @@
         <a class="back" href="../">← все примеры</a>
         <h1>Todo</h1>
         <p>Задачи хранятся в localStorage через composable <code>useStoredSignal</code>, фильтр — в
-            <code>?filter=</code> через <code>Plainly.location</code>. Перезагрузите страницу: всё на месте.</p>
+            <code>?filter=</code> через <code>Signa.location</code>. Перезагрузите страницу: всё на месте.</p>
 
         <div class="stage">
             <todo-app></todo-app>
@@ -25,7 +25,7 @@
         <details class="code">
             <summary>Код</summary>
             <script type="text/plain">
-                const { defineComponent, signal, effect } = window.Plainly;
+                const { defineComponent, signal, effect } = window.Signa;
 
                 // composable — обычная функция; effect внутри setup
                 // привязывается к компоненту и остановится вместе с ним
@@ -39,7 +39,7 @@
                 }
 
                 defineComponent('todo-app', ({ html, computed, location }) => {
-                    const todos = useStoredSignal('plainly-todos', []);
+                    const todos = useStoredSignal('signa-todos', []);
 
                     // фильтр живёт в URL: ?filter=done
                     const filter = computed(() => location.query.value.filter ?? 'all');

@@ -1,4 +1,4 @@
-const { defineComponent } = window.Plainly;
+const { defineComponent } = window.Signa;
 
 
 defineComponent('x-counter', ({ html, signal, computed, prop }) => {

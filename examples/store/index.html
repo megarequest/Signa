@@ -4,10 +4,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plainly Stores</title>
+    <title>Signa Stores</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="style.css">
-    <script src="../../dist/plainly.core.min.js"></script>
+    <script src="../../dist/signa.core.min.js"></script>
     <script src="cart.js"></script>
 </head>
 
@@ -33,7 +33,7 @@
             <summary>Код</summary>
             <script type="text/plain">
                 // cart.js — стор объявлен один раз
-                const useCart = Plainly.defineStore('cart', ({ signal, computed }) => {
+                const useCart = Signa.defineStore('cart', ({ signal, computed }) => {
                     const items = signal([]);
 
                     const count = computed(() => items.value.reduce((n, item) => n + item.qty, 0));
@@ -46,33 +46,33 @@
                 });
 
                 // компоненты читают один и тот же синглтон
-                Plainly.defineComponent('cart-badge', ({ html }) => {
+                Signa.defineComponent('cart-badge', ({ html }) => {
                     const cart = useCart();
 
                     return () => html`🛒 ${cart.count.value}`;
                 });
 
-                Plainly.defineComponent('product-list', ({ html }, { products, cart }) => () => html`
+                Signa.defineComponent('product-list', ({ html }, { products, cart }) => () => html`
                     ${products.list.value.map(product => html`
                         <button onclick=${() => cart.add(product)}>${product.name}</button>
                     `)}
                 `);
 
                 // данные с сервера
-                Plainly.store('products').list.value = <?= json_encode($products) ?>;
+                Signa.store('products').list.value = <?= json_encode($products) ?>;
             </script>
         </details>
 
         <h2>Три способа достать стор</h2>
         <pre><code>const cart = useCart()              // функция, которую вернул defineStore
 defineComponent('x', (ctx, { cart }) => ...) // второй аргумент setup
-Plainly.store('cart')               // по имени, откуда угодно</code></pre>
+Signa.store('cart')                 // по имени, откуда угодно</code></pre>
     </main>
 
     <script>
         // Так данные отдаёт сервер, например:
-        // Plainly.store('products').list.value = <?= json_encode($products) ?>;
-        Plainly.store('products').list.value = [
+        // Signa.store('products').list.value = <?= json_encode($products) ?>;
+        Signa.store('products').list.value = [
             { id: 1, name: 'Кофе', price: 250 },
             { id: 2, name: 'Круассан', price: 180 },
             { id: 3, name: 'Сырники', price: 320 },

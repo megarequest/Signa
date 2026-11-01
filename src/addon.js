@@ -1,7 +1,7 @@
 import { location } from './location.js';
 import { createRouter } from './router.js';
 
-const Plainly = window.Plainly;
+const Signa = window.Signa;
 
-Plainly.location = Plainly.ctx.location = location;
-Plainly.router = createRouter;
+Signa.location = Signa.ctx.location = location;
+Signa.router = createRouter;

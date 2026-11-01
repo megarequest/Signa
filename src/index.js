@@ -14,7 +14,7 @@ import { ext } from './ext.js';
 
 ext.bus = bus;
 
-export const Plainly = {
+export const Signa = {
     defineComponent,
     defineStore,
     store,
@@ -33,4 +33,4 @@ export const Plainly = {
     ctx: ext,
 };
 
-window.Plainly = Plainly;
+window.Signa = Signa;

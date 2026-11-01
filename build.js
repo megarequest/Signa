@@ -30,18 +30,18 @@ const coreSignals = {
 };
 
 const builds = [
-    { ...prod, format: 'iife', entryPoints: ['src/full.js'], outfile: 'dist/plainly.min.js' },
-    { ...prod, format: 'iife', entryPoints: ['src/index.js'], outfile: 'dist/plainly.core.min.js' },
-    { ...prod, ...coreSignals, format: 'iife', entryPoints: ['src/addon.js'], outfile: 'dist/plainly.router.min.js' },
-    { ...prod, format: 'esm', entryPoints: ['src/full.js'], outfile: 'dist/plainly.min.mjs' },
-    { ...dev, format: 'iife', entryPoints: ['src/full.js'], outfile: 'dist/plainly.dev.js' },
+    { ...prod, format: 'iife', entryPoints: ['src/full.js'], outfile: 'dist/signa.min.js' },
+    { ...prod, format: 'iife', entryPoints: ['src/index.js'], outfile: 'dist/signa.core.min.js' },
+    { ...prod, ...coreSignals, format: 'iife', entryPoints: ['src/addon.js'], outfile: 'dist/signa.router.min.js' },
+    { ...prod, format: 'esm', entryPoints: ['src/full.js'], outfile: 'dist/signa.min.mjs' },
+    { ...dev, format: 'iife', entryPoints: ['src/full.js'], outfile: 'dist/signa.dev.js' },
 ];
 
 fs.rmSync('dist', { recursive: true, force: true });
 
 await Promise.all(builds.map(options => esbuild.build(options)));
 
-fs.copyFileSync('src/plainly.d.ts', 'dist/plainly.d.ts');
+fs.copyFileSync('src/signa.d.ts', 'dist/signa.d.ts');
 
 const kb = n => (n / 1024).toFixed(2).padStart(6) + ' KB';
 

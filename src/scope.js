@@ -48,7 +48,7 @@ export function disposeScope(scope) {
         try {
             cleanup();
         } catch (e) {
-            console.error('[Plainly] cleanup error:', e);
+            console.error('[Signa] cleanup error:', e);
         }
     }
 }

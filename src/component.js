@@ -55,7 +55,7 @@ function parseAttr(value, type) {
         }
 
         if (__DEV__) {
-            console.warn(`[Plainly] cannot parse "${value}" as Number`);
+            console.warn(`[Signa] cannot parse "${value}" as Number`);
         }
 
         return 0;
@@ -112,7 +112,7 @@ class ReadonlyProp {
 
     set value(_) {
         if (__DEV__) {
-            console.warn(`[Plainly] prop "${this._key}" is read-only`);
+            console.warn(`[Signa] prop "${this._key}" is read-only`);
         }
     }
 
@@ -125,7 +125,7 @@ class ReadonlyProp {
 export function defineComponent(tagName, setup) {
     if (customElements.get(tagName)) {
         throw new Error(
-            __DEV__ ? `[Plainly] <${tagName}> is already defined` : tagName
+            __DEV__ ? `[Signa] <${tagName}> is already defined` : tagName
         );
     }
 
@@ -279,7 +279,7 @@ export function defineComponent(tagName, setup) {
                 });
             } catch (e) {
                 console.error(
-                    `[Plainly] error mounting <${tagName}>:`,
+                    `[Signa] error mounting <${tagName}>:`,
                     e
                 );
 

@@ -9,7 +9,7 @@
  *   </ui-modal>
  *
  *   <button data-open-modal="terms">Открыть</button>     — без единой строки JS
- *   Plainly.store('modals').open('terms')                  — или из кода
+ *   Signa.store('modals').open('terms')                  — или из кода
  *
  *   Любой элемент с data-close внутри окна закрывает его. Клик по фону и Escape — тоже.
  *
@@ -20,7 +20,7 @@
  *   const name = await modals.prompt('Новое имя', { value: 'старое' })   // null — отмена
  */
 
-Plainly.defineStore('modals', ({ signal }) => {
+Signa.defineStore('modals', ({ signal }) => {
     // id открытых декларативных окон, по порядку открытия
     const opened = signal([]);
 
@@ -60,11 +60,11 @@ Plainly.defineStore('modals', ({ signal }) => {
 document.addEventListener('click', e => {
     const opener = e.target.closest('[data-open-modal]');
 
-    if (opener) Plainly.store('modals').open(opener.dataset.openModal);
+    if (opener) Signa.store('modals').open(opener.dataset.openModal);
 });
 
 
-Plainly.defineComponent('ui-modal', ({ html, signal, computed, effect, prop, slot, $this }, { modals }) => {
+Signa.defineComponent('ui-modal', ({ html, signal, computed, effect, prop, slot, $this }, { modals }) => {
     const title = prop('title', String, '');
     const size = prop('size', String, 'md');
 
@@ -112,7 +112,7 @@ Plainly.defineComponent('ui-modal', ({ html, signal, computed, effect, prop, slo
 
 
 // Окно alert / confirm / prompt. Создаётся стором, удаляет себя само.
-Plainly.defineComponent('ui-ask', ({ html, signal, effect, $this }) => {
+Signa.defineComponent('ui-ask', ({ html, signal, effect, $this }) => {
     const ask = $this.ask;
 
     // что вернуть при Escape, клике по фону или «Отмена»

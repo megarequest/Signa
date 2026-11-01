@@ -4,17 +4,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plainly Basics</title>
+    <title>Signa Basics</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="style.css">
-    <script src="../../dist/plainly.core.min.js"></script>
+    <script src="../../dist/signa.core.min.js"></script>
 </head>
 
 <body>
     <main class="wrap">
         <a class="back" href="../">← все примеры</a>
         <h1>Основы</h1>
-        <p>Только ядро: <code>plainly.core.min.js</code>.</p>
+        <p>Только ядро: <code>signa.core.min.js</code>.</p>
 
         <h2>Сигналы</h2>
         <p><code>signal</code> хранит значение, <code>computed</code> вычисляется из других сигналов.</p>
@@ -26,7 +26,7 @@
             <script type="text/plain">
                 <x-counter data-start="3"></x-counter>
 
-                Plainly.defineComponent('x-counter', ({ html, signal, computed, prop }) => {
+                Signa.defineComponent('x-counter', ({ html, signal, computed, prop }) => {
                     const start = prop('start', Number, 0);
 
                     const count = signal(start.peek());
@@ -57,7 +57,7 @@
             <script type="text/plain">
                 <x-price id="price" data-amount="1990" data-sale="false"></x-price>
 
-                Plainly.defineComponent('x-price', ({ html, prop, computed }) => {
+                Signa.defineComponent('x-price', ({ html, prop, computed }) => {
                     const amount = prop('amount', Number, 0);
                     const currency = prop('currency', String, '₽');
                     const sale = prop('sale', Boolean, false);
@@ -99,7 +99,7 @@
                     <div data-slot="footer">footer-слот</div>
                 </x-card>
 
-                Plainly.defineComponent('x-card', ({ html, signal, slot }) => {
+                Signa.defineComponent('x-card', ({ html, signal, slot }) => {
                     const open = signal(true);
 
                     return () => html`
@@ -123,7 +123,7 @@
         <details class="code">
             <summary>Код</summary>
             <script type="text/plain">
-                Plainly.defineComponent('x-color-picker', ({ html, signal }) => {
+                Signa.defineComponent('x-color-picker', ({ html, signal }) => {
                     const colors = ['#e5484d', '#f76b15', '#ffc53d', '#30a46c', '#0090ff', '#8e4ec6'];
                     const selected = signal(colors[4]);
 
@@ -139,7 +139,7 @@
                     `;
                 });
 
-                Plainly.defineComponent('x-swatch', ({ html, prop }) => {
+                Signa.defineComponent('x-swatch', ({ html, prop }) => {
                     const color = prop('color', String);
                     const selected = prop('selected');   // сигнал родителя, как есть
                     const onPick = prop('onPick');       // функция, как есть

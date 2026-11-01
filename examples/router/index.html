@@ -4,11 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plainly Router</title>
+    <title>Signa Router</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="style.css">
     <!-- ядро + роутер одним файлом -->
-    <script src="../../dist/plainly.min.js"></script>
+    <script src="../../dist/signa.min.js"></script>
 </head>
 
 <body>
@@ -21,10 +21,10 @@
         <details class="code">
             <summary>Код</summary>
             <script type="text/plain">
-                const { defineComponent, defineStore, html } = window.Plainly;
+                const { defineComponent, defineStore, html } = window.Signa;
 
                 const useRouter = defineStore('router', () =>
-                    Plainly.router([
+                    Signa.router([
                         { name: 'home', path: '/', render: () => html`<h2>Главная</h2>` },
                         { name: 'users', path: '/users', render: () => html`<h2>Пользователи</h2>` },
                         { name: 'user', path: '/users/:id', render: ({ id }) => html`<h2>Пользователь ${id}</h2>` },
