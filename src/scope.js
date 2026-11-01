@@ -4,8 +4,8 @@ let currentScope = null;
 
 export function createScope() {
     return {
-        cleanups: new Set(),
-        disposed: false,
+        _cleanups: new Set(),
+        _disposed: false,
     };
 }
 
@@ -21,52 +21,34 @@ export function withScope(scope, fn) {
     }
 }
 
-export function effectInScope(fn) {
-    const scope = currentScope;
-
-    if (!scope || scope.disposed) {
-        throw new Error(
-            '[$$] effect() must be called inside a state or component setup'
-        );
-    }
-
+// Внутри setup компонента или фабрики стора эффект привязывается к scope
+// и останавливается вместе с ним. Снаружи — обычный эффект.
+export function effect(fn) {
     const stop = rawEffect(fn);
 
-    scope.cleanups.add(stop);
+    if (currentScope && !currentScope._disposed) {
+        currentScope._cleanups.add(stop);
+    }
 
     return stop;
 }
 
-export function addCleanup(cleanup) {
-    const scope = currentScope;
-
-    if (!scope || scope.disposed) {
-        throw new Error(
-            '[$$] cleanup must be registered inside a state or component setup'
-        );
-    }
-
-    scope.cleanups.add(cleanup);
-
-    return cleanup;
-}
-
 export function disposeScope(scope) {
-    if (!scope || scope.disposed) {
+    if (!scope || scope._disposed) {
         return;
     }
 
-    scope.disposed = true;
+    scope._disposed = true;
 
-    const cleanups = [...scope.cleanups].reverse();
+    const cleanups = [...scope._cleanups].reverse();
 
-    scope.cleanups.clear();
+    scope._cleanups.clear();
 
     for (const cleanup of cleanups) {
         try {
             cleanup();
         } catch (e) {
-            console.error('[$$] cleanup error:', e);
+            console.error('[Plainly] cleanup error:', e);
         }
     }
 }

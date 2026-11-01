@@ -1,0 +1,50 @@
+.navbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.navbar .wrap {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.navbar .back {
+    margin: 0;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.dd-user {
+    display: grid;
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+.dd-menu .danger-text {
+    color: var(--danger);
+}
+
+.dd-form {
+    width: 240px;
+    padding: 8px;
+}
+
+.dd-text {
+    width: 260px;
+    margin: 0;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.hint {
+    border-bottom: 1px dashed var(--muted);
+    cursor: help;
+}

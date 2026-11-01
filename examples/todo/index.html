@@ -2,21 +2,66 @@
 <html lang="ru">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Todo List</title>
-    <link href="styles.css" rel="stylesheet" />
-    <script src="../../dist/signa.min.js"></script>
-    <script src="main.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plainly Todo</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../../dist/plainly.core.min.js"></script>
+    <!-- Plainly.location -->
+    <script src="../../dist/plainly.router.min.js"></script>
 </head>
 
 <body>
-    <script>
+    <main class="wrap">
+        <a class="back" href="../">← все примеры</a>
+        <h1>Todo</h1>
+        <p>Задачи хранятся в localStorage через composable <code>useStoredSignal</code>, фильтр — в
+            <code>?filter=</code> через <code>Plainly.location</code>. Перезагрузите страницу: всё на месте.</p>
 
-    </script>
-    <div class="todo-app">
-        <h1>Todo List example</h1>
-        <todo-list></todo-list>
-    </div>
+        <div class="stage">
+            <todo-app></todo-app>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                const { defineComponent, signal, effect } = window.Plainly;
+
+                // composable — обычная функция; effect внутри setup
+                // привязывается к компоненту и остановится вместе с ним
+                function useStoredSignal(key, initial) {
+                    const stored = localStorage.getItem(key);
+                    const value = signal(stored === null ? initial : JSON.parse(stored));
+
+                    effect(() => localStorage.setItem(key, JSON.stringify(value.value)));
+
+                    return value;
+                }
+
+                defineComponent('todo-app', ({ html, computed, location }) => {
+                    const todos = useStoredSignal('plainly-todos', []);
+
+                    // фильтр живёт в URL: ?filter=done
+                    const filter = computed(() => location.query.value.filter ?? 'all');
+
+                    const visible = computed(() =>
+                        todos.value.filter(todo =>
+                            filter.value === 'all' || (filter.value === 'done' ? todo.done : !todo.done)
+                        )
+                    );
+
+                    return () => html`
+                        <ul>${visible.value.map(todo => html`<li>${todo.text}</li>`)}</ul>
+                        <button onclick=${() => location.set('filter', 'done')}>Готовые</button>
+                        <button onclick=${() => location.set('filter', null)}>Все</button>
+                    `;
+                });
+            </script>
+        </details>
+    </main>
+
+    <script src="../code.js"></script>
+    <script src="main.js"></script>
 </body>
 
 </html>

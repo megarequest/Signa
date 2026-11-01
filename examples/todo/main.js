@@ -1,111 +1,89 @@
+const { defineComponent, signal, effect } = window.Plainly;
 
 
-$$('todo-list', (ctx) => {
-    const { html, signal } = ctx;
+// Composable — обычная функция. Вызванный внутри setup, effect
+// привязывается к компоненту и остановится вместе с ним.
+function useStoredSignal(key, initial) {
+    const stored = localStorage.getItem(key);
+    const value = signal(stored === null ? initial : JSON.parse(stored));
 
-    const todoList = signal([
-        { id: 0, name: 'Check email', status: false },
-        { id: 1, name: 'Do morning exercise', status: true },
-        { id: 2, name: 'Make breakfast', status: false },
-        { id: 3, name: 'Read news', status: false },
-        { id: 4, name: 'Call colleague', status: true },
-        { id: 5, name: 'Write code', status: false },
-        { id: 6, name: 'Attend meeting', status: false }
-    ])
+    effect(() => localStorage.setItem(key, JSON.stringify(value.value)));
 
-    let counter = todoList.value.length;
+    return value;
+}
 
-    const inputName = signal('');
 
-    const create = () => {
-        const newItem = {
-            id: ++counter,
-            name: inputName.value.length == 0 ? 'Unamed' : inputName.value,
-            status: false
-        };
-        todoList.value = [...todoList.value, newItem];
-        inputName.value = '';
-    };
-    /**
-     * 
-     * @param {string} id 
-     * @param {boolean} status 
-     */
-    const changeStatus = (id, status) => {
-        todoList.value = todoList.value.map(item =>
-            item.id === id ? { ...item, ...{ status } } : item
+defineComponent('todo-app', ({ html, computed, location }) => {
+    const todos = useStoredSignal('plainly-todos', [
+        { id: 1, text: 'Подключить plainly.core.min.js', done: true },
+        { id: 2, text: 'Объявить компонент', done: true },
+        { id: 3, text: 'Выкинуть jQuery', done: false },
+    ]);
+
+    const draft = signal('');
+
+    const filter = computed(() => location.query.value.filter ?? 'all');
+
+    const visible = computed(() =>
+        todos.value.filter(todo =>
+            filter.value === 'all' ||
+            (filter.value === 'done' ? todo.done : !todo.done)
+        )
+    );
+
+    const left = computed(() => todos.value.filter(todo => !todo.done).length);
+
+    function add(e) {
+        e.preventDefault();
+
+        const text = draft.value.trim();
+
+        if (!text) return;
+
+        todos.value = [...todos.value, { id: Date.now(), text, done: false }];
+        draft.value = '';
+    }
+
+    function toggle(id) {
+        todos.value = todos.value.map(todo =>
+            todo.id === id ? { ...todo, done: !todo.done } : todo
         );
-    };
+    }
 
-    const filterState = signal(null);
+    function remove(id) {
+        todos.value = todos.value.filter(todo => todo.id !== id);
+    }
 
-    const getFilteredTodos = () => {
-        if (filterState.value == null) return todoList.value;
-        return todoList.value.filter(item => item.status == filterState.value);
-    };
+    const filters = [['all', 'Все'], ['active', 'Активные'], ['done', 'Готовые']];
 
-    const filterLabels = [
-        {
-            id: 'all',
-            name: 'All',
-            value: null,
-        },
-        {
-            id: 'active',
-            name: 'Active',
-            value: false,
-        },
-        {
-            id: 'complete',
-            name: 'Complete',
-            value: true,
-        }
-    ];
-
-    const buildForm = () => html`
-        <form action="#">
-            <input 
-                oninput="${(el) => inputName.value = el.target.value}" 
-                type="text" 
-                placeholder="Новая задача..."
-                .value=${inputName.value} 
-                required>
-            <button type="button" onclick=${create}>Add</button>
+    return () => html`
+        <form class="row" onsubmit=${add}>
+            <input class="grow" placeholder="Новая задача" .value=${draft.value}
+                oninput=${e => (draft.value = e.target.value)}>
+            <button class="primary">Добавить</button>
         </form>
-    `;
 
-    const buildFilters = () => html`
-        <div class="filters">
-            ${filterLabels.map((item) => html`
-                <input 
-                    type="radio" 
-                    name="filter" 
-                    id=${'filter-' + item.id}  
-                    onchange=${(el) => filterState.value = item.value}
-                    .checked=${item.value === filterState.value}>
-                <label  for=${'filter-' + item.id}>${item.name}</label>
-            `)}
-
-        </div>
-    `;
-
-    const buildList = () => html`
-        <ul>
-            ${getFilteredTodos().map((item) => html`
-                <li class=${item.status ? 'completed' : ''}>
-                    <input 
-                        type="checkbox" 
-                        onchange=${(el) => changeStatus(item.id, el.target.checked)} 
-                        .checked=${item.status}
-                        id=${'task-' + item.id}>
-                    <label for=${'task-' + item.id}>${item.name}</label>
+        <ul class="todos">
+            ${visible.value.map(todo => html`
+                <li class=${todo.done ? 'done' : ''}>
+                    <label>
+                        <input type="checkbox" .checked=${todo.done} onchange=${() => toggle(todo.id)}>
+                        ${todo.text}
+                    </label>
+                    <button class="ghost" aria-label="Удалить" onclick=${() => remove(todo.id)}>✕</button>
                 </li>
             `)}
         </ul>
-    `
-    return () => html`
-        ${buildForm()}
-        ${buildFilters()}
-        ${buildList()}
+
+        <div class="row">
+            <span class="muted">Осталось: ${left.value}</span>
+            <span class="spacer"></span>
+            ${filters.map(([key, label]) => html`
+                <button
+                    class=${filter.value === key ? 'active' : ''}
+                    onclick=${() => location.set('filter', key === 'all' ? null : key)}
+                >${label}</button>
+            `)}
+        </div>
     `;
 });

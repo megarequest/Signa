@@ -80,8 +80,7 @@ function update(url, replace = true) {
         url
     );
 
-    sync();
-
+    // sync вызовет обёртка над history в конце файла
     return url;
 }
 
@@ -138,7 +137,8 @@ export const location = {
             }
         }
 
-        return update(withQuery(getPath(), next));
+        // hash сохраняем: на нём может жить hash-роутер
+        return update(withQuery(getPath(), next) + getHash());
     },
 
     go(value) {
@@ -166,3 +166,15 @@ export const location = {
 
 window.addEventListener('popstate', sync);
 window.addEventListener('hashchange', sync);
+
+// pushState / replaceState сами по себе не вызывают popstate,
+// поэтому оборачиваем их один раз на всю страницу
+for (const method of ['pushState', 'replaceState']) {
+    const original = history[method];
+
+    history[method] = function (...args) {
+        const result = original.apply(this, args);
+        sync();
+        return result;
+    };
+}

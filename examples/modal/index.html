@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plainly Modals</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="ui-modal.css">
+    <link rel="stylesheet" href="ui-toast.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../../dist/plainly.core.min.js"></script>
+    <script src="ui-modal.js"></script>
+    <script src="ui-toast.js"></script>
+</head>
+
+<body>
+    <main class="wrap">
+        <a class="back" href="../">← все примеры</a>
+        <h1>Модальные окна</h1>
+        <p><code>&lt;ui-modal&gt;</code> на нативном <code>&lt;dialog&gt;</code>: фокус остаётся внутри окна,
+            Escape и клик по фону закрывают его. Компоненты — <code>ui-modal.js</code> и <code>ui-toast.js</code>.</p>
+
+        <h2>Без JS</h2>
+        <p>Окно описано в разметке, кнопка открывает его через <code>data-open-modal</code>.</p>
+        <div class="stage row">
+            <button data-open-modal="terms">Условия использования</button>
+            <button data-open-modal="subscribe">Подписаться</button>
+            <button data-open-modal="nested">Вложенное окно</button>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <link rel="stylesheet" href="ui-modal.css">
+                <script src="ui-modal.js"><\/script>
+
+                <button data-open-modal="terms">Условия использования</button>
+
+                <ui-modal id="terms" data-title="Условия использования" data-size="lg">
+                    <p>Любое содержимое...</p>
+                    <div data-slot="footer">
+                        <button data-close>Закрыть</button>
+                        <button class="primary" data-close id="accept-terms">Принимаю</button>
+                    </div>
+                </ui-modal>
+
+                // data-close внутри окна, Escape и клик по фону закрывают его.
+                // Из кода:
+                const modals = Plainly.store('modals');
+
+                modals.open('terms');
+                modals.close('terms');
+                modals.isOpen('terms');   // реактивно: можно читать в render
+            </script>
+        </details>
+
+        <h2>Через Promise</h2>
+        <p><code>await modals.confirm(...)</code> — без разметки, ответ приходит в коде.</p>
+        <div class="stage">
+            <file-list></file-list>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                const modals = Plainly.store('modals');
+
+                // true / false
+                const ok = await modals.confirm('Файл будет удалён без возможности восстановления.', {
+                    title: 'Удалить файл?',
+                    ok: 'Удалить',
+                    danger: true,
+                });
+
+                // строка или null при отмене
+                const name = await modals.prompt('Новое имя файла', {
+                    title: 'Переименовать',
+                    value: 'отчёт.pdf',
+                    ok: 'Сохранить',
+                });
+
+                await modals.alert('Всего файлов: 3', { title: 'Информация' });
+            </script>
+        </details>
+
+        <h2>Уведомления</h2>
+        <p><code>Plainly.store('toasts').success('...')</code></p>
+        <div class="stage row">
+            <button id="toast-info">Инфо</button>
+            <button id="toast-success">Успех</button>
+            <button id="toast-error">Ошибка (не исчезает)</button>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <link rel="stylesheet" href="ui-toast.css">
+                <script src="ui-toast.js"><\/script>
+
+                const toasts = Plainly.store('toasts');
+
+                toasts.show('Просто сообщение');
+                toasts.success('Сохранено');
+                toasts.error('Не удалось сохранить', { timeout: 0 });   // 0 — пока не закроют
+
+                // контейнер <ui-toasts> создаётся сам и показывается поверх модальных окон
+            </script>
+        </details>
+    </main>
+
+
+    <ui-modal id="terms" data-title="Условия использования" data-size="lg">
+        <p>Длинный текст прокручивается внутри окна, страница под ним остаётся на месте.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+            dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.</p>
+        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam
+            rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta.</p>
+        <div data-slot="footer">
+            <button data-close>Закрыть</button>
+            <button class="primary" data-close id="accept-terms">Принимаю</button>
+        </div>
+    </ui-modal>
+
+    <ui-modal id="subscribe" data-title="Подписка на новости" data-size="sm">
+        <form id="subscribe-form" class="stack">
+            <label class="field">Email
+                <input type="email" name="email" required placeholder="you@example.com">
+            </label>
+            <label><input type="checkbox" name="weekly" checked> Раз в неделю</label>
+            <button class="primary">Подписаться</button>
+        </form>
+    </ui-modal>
+
+    <ui-modal id="nested" data-title="Первое окно">
+        <p>Отсюда можно открыть ещё одно. Escape закроет только верхнее.</p>
+        <div data-slot="footer">
+            <button data-close>Закрыть</button>
+            <button class="primary" data-open-modal="nested-2">Открыть второе</button>
+        </div>
+    </ui-modal>
+
+    <ui-modal id="nested-2" data-title="Второе окно" data-size="sm">
+        <p>Окна складываются стопкой.</p>
+        <div data-slot="footer">
+            <button class="primary" data-close>Назад</button>
+        </div>
+    </ui-modal>
+
+    <script src="../code.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

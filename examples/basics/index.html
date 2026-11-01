@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plainly Basics</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../../dist/plainly.core.min.js"></script>
+</head>
+
+<body>
+    <main class="wrap">
+        <a class="back" href="../">← все примеры</a>
+        <h1>Основы</h1>
+        <p>Только ядро: <code>plainly.core.min.js</code>.</p>
+
+        <h2>Сигналы</h2>
+        <p><code>signal</code> хранит значение, <code>computed</code> вычисляется из других сигналов.</p>
+        <div class="stage">
+            <x-counter data-start="3"></x-counter>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <x-counter data-start="3"></x-counter>
+
+                Plainly.defineComponent('x-counter', ({ html, signal, computed, prop }) => {
+                    const start = prop('start', Number, 0);
+
+                    const count = signal(start.peek());
+                    const double = computed(() => count.value * 2);
+
+                    return () => html`
+                        <button onclick=${() => count.value--}>−</button>
+                        <output>${count.value}</output>
+                        <button onclick=${() => count.value++}>+</button>
+                        × 2 = ${double.value}
+                    `;
+                });
+            </script>
+        </details>
+
+        <h2>Пропсы из data-*</h2>
+        <p>Атрибуты приводятся к типу. Кнопки — обычный JS, который меняет <code>dataset</code>.</p>
+        <div class="stage stack">
+            <x-price id="price" data-amount="1990" data-sale="false"></x-price>
+            <div class="row">
+                <button id="cheaper">−100</button>
+                <button id="dearer">+100</button>
+                <button id="sale">Скидка вкл/выкл</button>
+            </div>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <x-price id="price" data-amount="1990" data-sale="false"></x-price>
+
+                Plainly.defineComponent('x-price', ({ html, prop, computed }) => {
+                    const amount = prop('amount', Number, 0);
+                    const currency = prop('currency', String, '₽');
+                    const sale = prop('sale', Boolean, false);
+
+                    const final = computed(() =>
+                        sale.value ? Math.round(amount.value * 0.8) : amount.value
+                    );
+
+                    return () => html`
+                        ${sale.value ? html`<s>${amount.value} ${currency.value}</s>` : null}
+                        <b>${final.value} ${currency.value}</b>
+                    `;
+                });
+
+                // обычный JS: компонент сам заметит смену атрибута
+                const price = document.getElementById('price');
+
+                document.getElementById('sale').onclick = () => {
+                    price.dataset.sale = price.dataset.sale !== 'true';
+                };
+            </script>
+        </details>
+
+        <h2>Слоты</h2>
+        <p>Содержимое элемента с <code>data-slot="имя"</code> попадает в <code>slot('имя')</code>, остальное — в <code>slot.default</code>.</p>
+        <div class="stage">
+            <x-card>
+                <div data-slot="title">Почему без фреймворка?</div>
+                <p>Сайт на PHP и пара интерактивных виджетов — тащить React и сборку ради них незачем.</p>
+                <div data-slot="footer">footer-слот</div>
+            </x-card>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <x-card>
+                    <div data-slot="title">Почему без фреймворка?</div>
+                    <p>Попадёт в slot.default</p>
+                    <div data-slot="footer">footer-слот</div>
+                </x-card>
+
+                Plainly.defineComponent('x-card', ({ html, signal, slot }) => {
+                    const open = signal(true);
+
+                    return () => html`
+                        <button onclick=${() => (open.value = !open.value)}>
+                            ${slot('title')} ${open.value ? '▾' : '▸'}
+                        </button>
+                        ${open.value ? html`
+                            <div>${slot.default}</div>
+                            <footer>${slot('footer')}</footer>
+                        ` : null}
+                    `;
+                });
+            </script>
+        </details>
+
+        <h2>Сигналы и колбэки в дочерние компоненты</h2>
+        <p>Через <code>.prop=${...}</code> передаётся сам сигнал (ребёнок видит изменения) или функция.</p>
+        <div class="stage">
+            <x-color-picker></x-color-picker>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                Plainly.defineComponent('x-color-picker', ({ html, signal }) => {
+                    const colors = ['#e5484d', '#f76b15', '#ffc53d', '#30a46c', '#0090ff', '#8e4ec6'];
+                    const selected = signal(colors[4]);
+
+                    return () => html`
+                        ${colors.map(color => html`
+                            <x-swatch
+                                .color=${color}
+                                .selected=${selected}
+                                .onPick=${c => (selected.value = c)}
+                            ></x-swatch>
+                        `)}
+                        <code>${selected.value}</code>
+                    `;
+                });
+
+                Plainly.defineComponent('x-swatch', ({ html, prop }) => {
+                    const color = prop('color', String);
+                    const selected = prop('selected');   // сигнал родителя, как есть
+                    const onPick = prop('onPick');       // функция, как есть
+
+                    return () => html`
+                        <button
+                            class=${selected.value === color.value ? 'swatch active' : 'swatch'}
+                            style=${`background:${color.value}`}
+                            onclick=${() => onPick(color.value)}
+                        ></button>
+                    `;
+                });
+            </script>
+        </details>
+    </main>
+
+    <script src="../code.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

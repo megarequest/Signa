@@ -1,21 +1,25 @@
-import { signal } from '@preact/signals-core';
-import { html } from 'uhtml/reactive';
+import { computed } from '@preact/signals-core';
+import { location } from './location.js';
 
+// Роутер не слушает браузер сам: путь берётся из реактивного Plainly.location
 export function createRouter(routes, { mode = 'hash' } = {}) {
-    const routeMap = {};
+    const hashMode = mode === 'hash';
 
-    const compiledRoutes = routes.map(r => {
+    const routeMap = {};
+    const compiledRoutes = [];
+
+    let notFound = {
+        render: () => '404',
+    };
+
+    for (const r of routes) {
         if (r.path === '*') {
-            const entry = {
+            notFound = routeMap[r.name || '*'] = {
                 ...r,
                 keys: [],
-                regex: null,
-                catchAll: true,
             };
 
-            routeMap[r.name || '*'] = entry;
-
-            return entry;
+            continue;
         }
 
         const keys = [];
@@ -38,23 +42,15 @@ export function createRouter(routes, { mode = 'hash' } = {}) {
             regex,
         };
 
-        routeMap[r.name] = entry;
+        compiledRoutes.push(entry);
 
-        return entry;
-    });
-
-    function getPath() {
-        return mode === 'hash'
-            ? window.location.hash.slice(1) || '/'
-            : window.location.pathname || '/';
+        if (r.name) {
+            routeMap[r.name] = entry;
+        }
     }
 
     function parse(path) {
-        path = path || '/';
-
         for (const route of compiledRoutes) {
-            if (route.catchAll) continue;
-
             const match = path.match(route.regex);
 
             if (!match) continue;
@@ -74,54 +70,29 @@ export function createRouter(routes, { mode = 'hash' } = {}) {
             };
         }
 
-        const notFound = compiledRoutes.find(
-            route => route.catchAll
-        );
-
         return {
             path,
-            route: notFound || {
-                render: () => html`404`,
-            },
+            route: notFound,
             params: {},
         };
     }
 
-    const current = signal(
-        parse(getPath())
-    );
+    // отдельный computed для строки пути: смена query или
+    // другой части URL не вызывает лишний разбор и перерисовку
+    const path = computed(() => {
+        const { path, hash } = location.current.value;
 
-    function sync() {
-        current.value = parse(getPath());
-    }
+        return (hashMode ? hash.slice(1) : path) || '/';
+    });
 
-    // Нативные изменения URL браузером
-    window.addEventListener('popstate', sync);
-    window.addEventListener('hashchange', sync);
-
-    // pushState / replaceState сами по себе
-    // не вызывают popstate, поэтому отслеживаем их тоже.
-    const pushState = history.pushState;
-    const replaceState = history.replaceState;
-
-    history.pushState = function (...args) {
-        const result = pushState.apply(this, args);
-        sync();
-        return result;
-    };
-
-    history.replaceState = function (...args) {
-        const result = replaceState.apply(this, args);
-        sync();
-        return result;
-    };
+    const current = computed(() => parse(path.value));
 
     function route(name, params = {}) {
         const r = routeMap[name];
 
         if (!r) {
             throw new Error(
-                `Route "${name}" not found`
+                __DEV__ ? `[Plainly] route "${name}" not found` : name
             );
         }
 
@@ -130,7 +101,9 @@ export function createRouter(routes, { mode = 'hash' } = {}) {
         for (const key of r.keys) {
             if (!(key in params)) {
                 throw new Error(
-                    `Missing param "${key}" for route "${name}"`
+                    __DEV__
+                        ? `[Plainly] missing param "${key}" for route "${name}"`
+                        : key
                 );
             }
 
@@ -140,42 +113,21 @@ export function createRouter(routes, { mode = 'hash' } = {}) {
             );
         }
 
-        return mode === 'hash'
+        return hashMode
             ? '#' + path
             : path;
     }
 
     function go(nameOrPath, params) {
-        if (routeMap[nameOrPath]) {
-            const href = route(
-                nameOrPath,
-                params
-            );
+        const href = routeMap[nameOrPath]
+            ? route(nameOrPath, params)
+            : hashMode
+                ? '#' + nameOrPath.replace(/^#/, '')
+                : nameOrPath;
 
-            if (mode === 'hash') {
-                window.location.hash = href.slice(1);
-            } else {
-                history.pushState(
-                    null,
-                    '',
-                    href
-                );
-            }
+        location.push(href);
 
-            return href;
-        }
-
-        if (mode === 'hash') {
-            window.location.hash = nameOrPath;
-        } else {
-            history.pushState(
-                null,
-                '',
-                nameOrPath
-            );
-        }
-
-        return nameOrPath;
+        return href;
     }
 
     function view() {

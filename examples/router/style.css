@@ -1,0 +1,19 @@
+app-root {
+    display: block;
+}
+
+.btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.page {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.page h2 {
+    margin-top: 8px;
+}

@@ -1,0 +1,77 @@
+/* контейнер — popover (верхний слой, поверх <dialog>); сбрасываем его стили по умолчанию */
+ui-toasts {
+    position: fixed;
+    inset: auto 16px 16px auto;
+    z-index: 100;
+    width: min(360px, calc(100% - 32px));
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    overflow: visible;
+    color: inherit;
+}
+
+.toasts {
+    display: grid;
+    gap: 8px;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #ddd);
+    border-left: 4px solid var(--accent, #0090ff);
+    border-radius: 10px;
+    box-shadow: var(--shadow, 0 8px 24px rgb(0 0 0 / .12));
+    animation: toast-in .2s ease-out;
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+.toast-success {
+    border-left-color: #30a46c;
+}
+
+.toast-error {
+    border-left-color: var(--danger, #e5484d);
+}
+
+.toast-icon {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent, #0090ff);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.toast-success .toast-icon {
+    background: #30a46c;
+}
+
+.toast-error .toast-icon {
+    background: var(--danger, #e5484d);
+}
+
+.toast-text {
+    flex: 1;
+}
+
+.toast-x {
+    border: 0;
+    background: none;
+    color: var(--muted, #888);
+    cursor: pointer;
+}

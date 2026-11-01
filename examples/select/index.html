@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plainly Select</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="ui-select.css">
+    <script src="../../dist/plainly.core.min.js"></script>
+    <script src="ui-select.js"></script>
+</head>
+
+<body>
+    <main class="wrap">
+        <a class="back" href="../">← все примеры</a>
+        <h1>Select</h1>
+        <p><code>&lt;ui-select&gt;</code> — выпадающий список со стрелками, Enter, Escape и поиском. Компонент —
+            <code>ui-select.js</code> + <code>ui-select.css</code>.</p>
+
+        <h2>Варианты из разметки</h2>
+        <p>Обычные <code>&lt;option&gt;</code> внутри — их удобно отдать с сервера. Событие <code>change</code>
+            слушает обычный JS.</p>
+        <div class="stage row">
+            <ui-select id="sort" data-placeholder="Сортировка">
+                <option value="new">Сначала новые</option>
+                <option value="cheap">Сначала дешёвые</option>
+                <option value="expensive">Сначала дорогие</option>
+                <option value="rating" disabled>По рейтингу (скоро)</option>
+            </ui-select>
+            <span id="sort-out" class="muted">Ничего не выбрано</span>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <link rel="stylesheet" href="ui-select.css">
+                <script src="ui-select.js"><\/script>
+
+                <ui-select id="sort" data-placeholder="Сортировка">
+                    <option value="new">Сначала новые</option>
+                    <option value="cheap">Сначала дешёвые</option>
+                    <option value="expensive">Сначала дорогие</option>
+                    <option value="rating" disabled>По рейтингу (скоро)</option>
+                </ui-select>
+
+                document.getElementById('sort').addEventListener('change', e => {
+                    console.log(e.detail.value, e.detail.option.label);
+                });
+            </script>
+        </details>
+
+        <h2>Поиск и форма</h2>
+        <p><code>data-search</code> добавляет фильтр, <code>data-name</code> — скрытый input, так что значение
+            уходит вместе с формой.</p>
+        <form id="order" class="stage stack">
+            <label class="field">Город доставки
+                <ui-select data-name="city" data-search data-value="spb">
+                    <option value="msk">Москва</option>
+                    <option value="spb">Санкт-Петербург</option>
+                    <option value="nsk">Новосибирск</option>
+                    <option value="ekb">Екатеринбург</option>
+                    <option value="kzn">Казань</option>
+                    <option value="nnv">Нижний Новгород</option>
+                    <option value="chl">Челябинск</option>
+                    <option value="sam">Самара</option>
+                    <option value="ufa">Уфа</option>
+                    <option value="rnd">Ростов-на-Дону</option>
+                    <option value="krd">Краснодар</option>
+                </ui-select>
+            </label>
+            <label class="field">Способ оплаты
+                <ui-select data-name="payment" data-placeholder="Выберите способ">
+                    <option value="card">Картой онлайн</option>
+                    <option value="cash">Наличными курьеру</option>
+                </ui-select>
+            </label>
+            <div class="row">
+                <button class="primary">Отправить</button>
+                <code id="order-out" class="muted"></code>
+            </div>
+        </form>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <form id="order">
+                    <ui-select data-name="city" data-search data-value="spb">
+                        <option value="msk">Москва</option>
+                        <option value="spb">Санкт-Петербург</option>
+                        ...
+                    </ui-select>
+
+                    <ui-select data-name="payment" data-placeholder="Выберите способ">
+                        <option value="card">Картой онлайн</option>
+                        <option value="cash">Наличными курьеру</option>
+                    </ui-select>
+
+                    <button>Отправить</button>
+                </form>
+
+                // data-name создаёт скрытый input — значение уходит вместе с формой
+                document.getElementById('order').addEventListener('submit', e => {
+                    e.preventDefault();
+                    console.log(Object.fromEntries(new FormData(e.target)));   // { city: 'spb', payment: 'card' }
+                });
+            </script>
+        </details>
+
+        <h2>Зависимые списки</h2>
+        <p>Родительский компонент передаёт варианты сигналом (<code>.options</code>) и слушает выбор через
+            <code>.onChange</code>.</p>
+        <div class="stage">
+            <car-picker></car-picker>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                const cars = {
+                    toyota: ['Camry', 'Corolla', 'RAV4'],
+                    bmw: ['3 Series', '5 Series', 'X5'],
+                };
+
+                const brands = [
+                    { value: 'toyota', label: 'Toyota' },
+                    { value: 'bmw', label: 'BMW' },
+                ];
+
+                Plainly.defineComponent('car-picker', ({ html, signal, computed }) => {
+                    const brand = signal(null);
+                    const model = signal(null);
+
+                    // сигнал уходит в дочерний ui-select: список обновится при смене марки
+                    const models = computed(() =>
+                        (cars[brand.value] ?? []).map(name => ({ value: name, label: name }))
+                    );
+
+                    const pickBrand = value => {
+                        brand.value = value;
+                        model.value = null;
+                    };
+
+                    return () => html`
+                        <ui-select data-placeholder="Марка" .options=${brands} .onChange=${pickBrand}></ui-select>
+                        <ui-select
+                            data-placeholder="Модель"
+                            ?data-disabled=${!brand.value}
+                            .options=${models}
+                            .onChange=${value => (model.value = value)}
+                        ></ui-select>
+                    `;
+                });
+            </script>
+        </details>
+    </main>
+
+    <script src="../code.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

@@ -1,26 +1,23 @@
-import { reactive, html } from 'uhtml/reactive';
+import { render, html } from 'uhtml';
 
 import {
-    effect as rawEffect,
     signal,
     computed,
 } from '@preact/signals-core';
 
 import {
     isSignal,
-    createStateAccess,
-} from './state.js';
+    storeAccess,
+} from './store.js';
 
 import {
     createScope,
     withScope,
-    effectInScope,
-    addCleanup,
+    effect,
     disposeScope,
 } from './scope.js';
 
-import { bus } from './bus.js';
-import { location } from './location.js';
+import { ext } from './ext.js';
 
 
 function toKebab(str) {
@@ -35,61 +32,49 @@ function toCamel(str) {
 }
 
 
-function parseAttr(value, type) {
-    if (value === null) {
-        return null;
-    }
+// фабрики, а не значения: {} и [] не должны делиться между экземплярами
+const DEFAULTS = new Map([
+    [String, () => ''],
+    [Number, () => 0],
+    [Boolean, () => false],
+    [Object, () => ({})],
+    [Array, () => []],
+]);
 
-    switch (type) {
-        case Number: {
-            const n = Number(value);
-
-            if (Number.isNaN(n)) {
-                console.warn(`[$$] cannot parse "${value}" as Number`);
-                return defaultFor(Number);
-            }
-
-            return n;
-        }
-
-        case Boolean:
-            // "" (голый атрибут) и любое значение, кроме "false" -> true
-            return value !== 'false';
-
-        case Object:
-        case Array:
-            try {
-                return JSON.parse(value);
-            } catch {
-                return type === Object ? {} : [];
-            }
-
-        default:
-            return value;
-    }
+function defaultFor(type) {
+    return DEFAULTS.get(type)?.() ?? null;
 }
 
 
-function defaultFor(type) {
-    switch (type) {
-        case String:
-            return '';
+function parseAttr(value, type) {
+    if (type === Number) {
+        const n = Number(value);
 
-        case Number:
-            return 0;
+        if (!Number.isNaN(n)) {
+            return n;
+        }
 
-        case Boolean:
-            return false;
+        if (__DEV__) {
+            console.warn(`[Plainly] cannot parse "${value}" as Number`);
+        }
 
-        case Object:
-            return {};
-
-        case Array:
-            return [];
-
-        default:
-            return null;
+        return 0;
     }
+
+    if (type === Boolean) {
+        // "" (голый атрибут) и любое значение, кроме "false" -> true
+        return value !== 'false';
+    }
+
+    if (type === Object || type === Array) {
+        try {
+            return JSON.parse(value);
+        } catch {
+            return defaultFor(type);
+        }
+    }
+
+    return value;
 }
 
 
@@ -98,59 +83,66 @@ function detectType(raw, attrVal, defaultValue) {
         return raw.constructor;
     }
 
-    if (attrVal !== null) {
-        const trimmed = attrVal.trim();
-
-        if (trimmed !== '' && !isNaN(Number(trimmed))) {
-            return Number;
-        }
-
-        if (trimmed === 'true' || trimmed === 'false') {
-            return Boolean;
-        }
-
-        if (trimmed.startsWith('{')) {
-            return Object;
-        }
-
-        if (trimmed.startsWith('[')) {
-            return Array;
-        }
-
-        return String;
+    if (attrVal === null) {
+        return defaultValue != null ? defaultValue.constructor : String;
     }
 
-    if (defaultValue != null) {
-        return defaultValue.constructor;
-    }
+    const trimmed = attrVal.trim();
+
+    if (trimmed !== '' && !isNaN(Number(trimmed))) return Number;
+    if (trimmed === 'true' || trimmed === 'false') return Boolean;
+    if (trimmed[0] === '{') return Object;
+    if (trimmed[0] === '[') return Array;
 
     return String;
 }
 
 
-export function defComponent(tagName, setup) {
+// Обёртка пропса только для чтения. Один прототип на все пропсы
+// вместо объекта с геттерами на каждый вызов prop()
+class ReadonlyProp {
+    constructor(s, key) {
+        this._s = s;
+        this._key = key;
+    }
+
+    get value() {
+        return this._s.value;
+    }
+
+    set value(_) {
+        if (__DEV__) {
+            console.warn(`[Plainly] prop "${this._key}" is read-only`);
+        }
+    }
+
+    peek() {
+        return this._s.peek();
+    }
+}
+
+
+export function defineComponent(tagName, setup) {
     if (customElements.get(tagName)) {
         throw new Error(
-            `[$$] <${tagName}> is already defined`
+            __DEV__ ? `[Plainly] <${tagName}> is already defined` : tagName
         );
     }
 
-    const uRender = reactive(rawEffect);
-
     class Component extends HTMLElement {
-        // name -> readonly-обёртка или внешний сигнал/функция
+        // name -> ReadonlyProp или внешний сигнал/функция
         #props = new Map();
 
-        // name -> { s, type }: только сигналы, которыми владеет компонент.
+        // name -> { s, type, def }: только сигналы, которыми владеет компонент.
         // Внешние сигналы сюда НЕ попадают, атрибуты их не перезаписывают.
         #owned = new Map();
 
         // имя атрибута (в нижнем регистре) -> имя пропса
         #attrToProp = new Map();
 
-        #slots = { default: [] };
-        #slotsCollected = false;
-        #mounted = false;
+        #slots = null;
+
+        // scope живёт, пока компонент смонтирован; null — не смонтирован
         #scope = null;
         #observer = null;
 
@@ -162,7 +154,9 @@ export function defComponent(tagName, setup) {
                 return this.#props.get(key);
             }
 
-            const raw = this[key];
+            // только собственное свойство экземпляра (.prop=${...} от родителя):
+            // родные title, id, hidden и т.п. не должны перебивать data-атрибут
+            const raw = Object.prototype.hasOwnProperty.call(this, key) ? this[key] : undefined;
 
             if (isSignal(raw) || typeof raw === 'function') {
                 this.#props.set(key, raw);
@@ -187,116 +181,120 @@ export function defComponent(tagName, setup) {
 
             const s = signal(initial);
 
-            this.#owned.set(key, { s, type: finalType });
+            this.#owned.set(key, { s, type: finalType, def: defaultValue });
             this.#attrToProp.set(`data-${kebab}`, key);
             this.#attrToProp.set(`data-${key.toLowerCase()}`, key);
 
-            const readonly = {
-                get value() {
-                    return s.value;
-                },
+            const prop = new ReadonlyProp(s, key);
 
-                set value(_) {
-                    console.warn(
-                        `[$$] prop "${key}" is read-only`
-                    );
-                },
+            this.#props.set(key, prop);
 
-                peek: s.peek.bind(s),
-            };
-
-            this.#props.set(key, readonly);
-
-            return readonly;
+            return prop;
         }
 
         #collectSlots() {
             // собираем один раз: после первого рендера в childNodes
             // уже лежит отрисованный результат, а не исходные слоты
-            if (this.#slotsCollected) {
-                return;
+            if (this.#slots) {
+                return this.#slots;
             }
-
-            this.#slotsCollected = true;
 
             const slots = {
                 default: [],
             };
 
             for (const node of [...this.childNodes]) {
-                if (node instanceof Element) {
-                    const name = node.getAttribute('data-slot');
+                const name = node instanceof Element && node.getAttribute('data-slot');
 
-                    if (name) {
-                        slots[name] ??= [];
-                        slots[name].push(...node.childNodes);
-                    } else {
-                        slots.default.push(node);
-                    }
+                if (name) {
+                    (slots[name] ??= []).push(...node.childNodes);
                 } else {
                     slots.default.push(node);
                 }
             }
 
-            this.#slots = slots;
+            return (this.#slots = slots);
         }
 
         #ctx() {
-            const slot = Object.assign(
-                name => this.#slots[name] ?? [],
-                {
-                    default: this.#slots.default,
-                }
-            );
+            const slots = this.#collectSlots();
 
             return {
+                ...ext,
+
                 $this: this,
 
                 signal,
                 computed,
-                effect: effectInScope,
+                effect,
 
                 html,
 
                 prop: (name, type, def) =>
                     this.#resolveProp(name, type, def),
 
-                slot,
-                bus,
-                location,
+                slot: Object.assign(
+                    name => slots[name] ?? [],
+                    { default: slots.default }
+                ),
             };
         }
 
         #onAttributes(mutations) {
-            for (const mutation of mutations) {
-                const key = this.#attrToProp.get(mutation.attributeName);
-
-                if (!key) {
-                    continue;
-                }
-
-                const entry = this.#owned.get(key);
+            for (const { attributeName } of mutations) {
+                const entry = this.#owned.get(this.#attrToProp.get(attributeName));
 
                 if (!entry) {
                     continue;
                 }
 
-                entry.s.value = parseAttr(
-                    this.getAttribute(mutation.attributeName),
-                    entry.type
-                ) ?? defaultFor(entry.type);
+                const value = this.getAttribute(attributeName);
+
+                entry.s.value = value === null
+                    ? entry.def ?? defaultFor(entry.type)
+                    : parseAttr(value, entry.type);
+            }
+        }
+
+        #mount(scope) {
+            // элемент успели отключить, пока ждали монтирования
+            if (this.#scope !== scope) {
+                return;
+            }
+
+            try {
+                withScope(scope, () => {
+                    const renderFn = setup(
+                        this.#ctx(),
+                        storeAccess()
+                    );
+
+                    if (typeof renderFn === 'function') {
+                        // эффект живёт в scope компонента и
+                        // останавливается вместе с ним
+                        effect(() => {
+                            render(this, renderFn());
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error(
+                    `[Plainly] error mounting <${tagName}>:`,
+                    e
+                );
+
+                this.#teardown();
             }
         }
 
         connectedCallback() {
-            if (this.#mounted) {
+            // повторное подключение в том же тике (перемещение по DOM):
+            // компонент остаётся смонтированным и сохраняет состояние
+            if (this.#scope) {
                 return;
             }
 
-            this.#mounted = true;
-
-            const scope = createScope();
-            this.#scope = scope;
+            const scope = (this.#scope = createScope());
 
             this.#observer = new MutationObserver(
                 mutations => this.#onAttributes(mutations)
@@ -306,55 +304,28 @@ export function defComponent(tagName, setup) {
                 attributes: true,
             });
 
-            requestAnimationFrame(() => {
-                // сравниваем с локальным scope: если элемент успели
-                // отключить и подключить заново, этот колбэк устарел
-                if (
-                    !this.#mounted ||
-                    this.#scope !== scope ||
-                    scope.disposed
-                ) {
-                    return;
-                }
+            // пока парсер не дошёл до конца документа, дети элемента
+            // (а значит и слоты) могут быть ещё не созданы
+            if (document.readyState === 'loading') {
+                document.addEventListener(
+                    'DOMContentLoaded',
+                    () => this.#mount(scope),
+                    { once: true }
+                );
+            } else {
+                queueMicrotask(() => this.#mount(scope));
+            }
+        }
 
-                try {
-                    this.#collectSlots();
-
-                    withScope(scope, () => {
-                        const renderFn = setup(
-                            this.#ctx(),
-                            createStateAccess()
-                        );
-
-                        if (typeof renderFn === 'function') {
-                            const clean = uRender(
-                                this,
-                                renderFn
-                            );
-
-                            if (typeof clean === 'function') {
-                                addCleanup(clean);
-                            }
-                        }
-                    });
-                } catch (e) {
-                    console.error(
-                        `[$$] error mounting <${tagName}>:`,
-                        e
-                    );
-
+        disconnectedCallback() {
+            queueMicrotask(() => {
+                if (!this.isConnected) {
                     this.#teardown();
                 }
             });
         }
 
-        disconnectedCallback() {
-            this.#teardown();
-        }
-
         #teardown() {
-            this.#mounted = false;
-
             this.#observer?.disconnect();
             this.#observer = null;
 

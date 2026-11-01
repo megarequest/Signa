@@ -1,9 +1,14 @@
 {
-    "name": "simple-iife-build",
+    "name": "plainly",
     "version": "1.0.0",
     "type": "module",
-    "description": "Web component lib",
-    "main": "dist/bundle.js",
+    "description": "Native web components + signals for plain HTML pages",
+    "main": "dist/plainly.min.js",
+    "module": "dist/plainly.min.mjs",
+    "types": "dist/plainly.d.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "node build.js"
     },

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plainly Router</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- ядро + роутер одним файлом -->
+    <script src="../../dist/plainly.min.js"></script>
+</head>
+
+<body>
+    <main class="wrap">
+        <a class="back" href="../">← все примеры</a>
+        <h1>Роутер</h1>
+        <p>Hash-роутер: именованные маршруты, параметры, кнопки браузера «назад» и «вперёд».</p>
+
+        <app-root class="stage"></app-root>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                const { defineComponent, defineStore, html } = window.Plainly;
+
+                const useRouter = defineStore('router', () =>
+                    Plainly.router([
+                        { name: 'home', path: '/', render: () => html`<h2>Главная</h2>` },
+                        { name: 'users', path: '/users', render: () => html`<h2>Пользователи</h2>` },
+                        { name: 'user', path: '/users/:id', render: ({ id }) => html`<h2>Пользователь ${id}</h2>` },
+                        { path: '*', render: () => html`<h2>404</h2>` },
+                    ])   // { mode: 'history' } — без #
+                );
+
+                defineComponent('nav-link', ({ html, prop, slot }) => {
+                    const router = useRouter();
+                    const to = prop('to', String, 'home');
+
+                    return () => html`
+                        <a class=${router.current.value.route.name === to.value ? 'active' : ''}
+                            href=${router.route(to.value)}>${slot.default}</a>
+                    `;
+                });
+
+                defineComponent('app-root', ({ html }) => {
+                    const router = useRouter();
+
+                    return () => html`
+                        <nav-link data-to="home">Главная</nav-link>
+                        <nav-link data-to="users">Пользователи</nav-link>
+                        <button onclick=${() => router.go('user', { id: 2 })}>Пользователь 2</button>
+                        ${router.view()}
+                    `;
+                });
+            </script>
+        </details>
+    </main>
+
+    <script src="../code.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

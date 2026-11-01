@@ -1,0 +1,30 @@
+todo-app {
+    display: block;
+}
+
+.grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.todos {
+    list-style: none;
+    margin: 12px 0;
+    padding: 0;
+}
+
+.todos li {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.todos label {
+    flex: 1;
+}
+
+.todos .done label {
+    color: var(--muted);
+    text-decoration: line-through;
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Plainly Dropdown</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="ui-dropdown.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="../../dist/plainly.core.min.js"></script>
+    <script src="ui-dropdown.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="wrap row">
+            <a class="back" href="../">← все примеры</a>
+            <span class="spacer"></span>
+
+            <ui-dropdown data-hover>
+                <div data-slot="trigger"><button class="ghost">Продукты ▾</button></div>
+                <div class="dd-menu">
+                    <a href="#">Аналитика</a>
+                    <a href="#">Хранилище</a>
+                    <a href="#">API</a>
+                </div>
+            </ui-dropdown>
+
+            <ui-dropdown data-align="end">
+                <div data-slot="trigger"><button class="avatar" aria-label="Профиль">АК</button></div>
+                <div class="dd-menu">
+                    <div class="dd-user">
+                        <b>Анна Кузнецова</b>
+                        <span class="muted">anna@example.com</span>
+                    </div>
+                    <hr>
+                    <a href="#">Профиль</a>
+                    <a href="#">Настройки</a>
+                    <hr>
+                    <button>Выйти</button>
+                </div>
+            </ui-dropdown>
+        </div>
+    </nav>
+
+    <main class="wrap">
+        <h1>Dropdown</h1>
+        <p><code>&lt;ui-dropdown&gt;</code> оборачивает любую кнопку и любое содержимое. Закрывается по клику
+            снаружи и по Escape. Компонент — <code>ui-dropdown.js</code> + <code>ui-dropdown.css</code>.</p>
+
+        <h2>Меню по клику</h2>
+        <p>Ссылки и кнопки внутри панели закрывают её. Обработчики — обычный JS в <code>main.js</code>.</p>
+        <div class="stage row">
+            <ui-dropdown id="actions">
+                <div data-slot="trigger"><button>Действия ▾</button></div>
+                <div class="dd-menu">
+                    <button data-action="copy">Копировать</button>
+                    <button data-action="rename">Переименовать</button>
+                    <hr>
+                    <button data-action="delete" class="danger-text">Удалить</button>
+                </div>
+            </ui-dropdown>
+            <span id="last-action" class="muted">Выберите действие</span>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <link rel="stylesheet" href="ui-dropdown.css">
+                <script src="ui-dropdown.js"><\/script>
+
+                <ui-dropdown id="actions">
+                    <div data-slot="trigger"><button>Действия ▾</button></div>
+                    <div class="dd-menu">
+                        <button data-action="copy">Копировать</button>
+                        <button data-action="rename">Переименовать</button>
+                        <hr>
+                        <button data-action="delete">Удалить</button>
+                    </div>
+                </ui-dropdown>
+
+                // обычный JS: dropdown не знает, что у него внутри
+                document.getElementById('actions').addEventListener('click', e => {
+                    const button = e.target.closest('[data-action]');
+
+                    if (button) console.log(button.dataset.action);
+                });
+
+                // профиль в шапке: панель прижата к правому краю
+                <ui-dropdown data-align="end">...</ui-dropdown>
+            </script>
+        </details>
+
+        <h2>Форма внутри панели</h2>
+        <p><code>data-keep-open</code>: кнопки внутри не закрывают панель.</p>
+        <div class="stage stack">
+            <ui-dropdown data-keep-open id="filters">
+                <div data-slot="trigger"><button>Фильтры ▾</button></div>
+                <form class="dd-form stack">
+                    <label><input type="checkbox" name="stock" checked> В наличии</label>
+                    <label><input type="checkbox" name="sale"> Со скидкой</label>
+                    <label class="field">Цена до
+                        <input type="range" name="price" min="0" max="10000" step="500" value="5000">
+                    </label>
+                    <button class="primary" type="submit">Применить</button>
+                </form>
+            </ui-dropdown>
+            <pre id="filters-out">Нажмите «Применить»</pre>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <ui-dropdown data-keep-open id="filters">
+                    <div data-slot="trigger"><button>Фильтры ▾</button></div>
+                    <form class="dd-form">
+                        <label><input type="checkbox" name="stock" checked> В наличии</label>
+                        <label><input type="checkbox" name="sale"> Со скидкой</label>
+                        <input type="range" name="price" min="0" max="10000" step="500" value="5000">
+                        <button type="submit">Применить</button>
+                    </form>
+                </ui-dropdown>
+
+                const filters = document.getElementById('filters');
+
+                filters.addEventListener('submit', e => {
+                    e.preventDefault();
+                    console.log(Object.fromEntries(new FormData(e.target)));
+                });
+
+                // события самого dropdown
+                filters.addEventListener('dropdown:open', () => { /* ... */ });
+                filters.addEventListener('dropdown:close', () => { /* ... */ });
+            </script>
+        </details>
+
+        <h2>Наведение</h2>
+        <p><code>data-hover</code> — как меню «Продукты» в шапке.</p>
+        <div class="stage">
+            <ui-dropdown data-hover>
+                <div data-slot="trigger"><span class="hint" tabindex="0">Что такое сигнал? ⓘ</span></div>
+                <p class="dd-text">Реактивное значение: компонент, который прочитал
+                    <code>signal.value</code>, перерисуется при его изменении.</p>
+            </ui-dropdown>
+        </div>
+        <details class="code">
+            <summary>Код</summary>
+            <script type="text/plain">
+                <ui-dropdown data-hover>
+                    <div data-slot="trigger"><span tabindex="0">Что такое сигнал? ⓘ</span></div>
+                    <p class="dd-text">Реактивное значение: ...</p>
+                </ui-dropdown>
+
+                // атрибуты ui-dropdown:
+                // data-align="start | end"  к какому краю прижать панель
+                // data-hover                открывать при наведении
+                // data-keep-open            не закрывать по клику на ссылки и кнопки внутри
+            </script>
+        </details>
+    </main>
+
+    <script src="../code.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

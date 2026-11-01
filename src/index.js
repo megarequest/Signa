@@ -1,56 +1,36 @@
-
-import { defComponent } from './component.js';
-
 import {
-    defState,
-    resolveState,
-} from './state.js';
+    signal,
+    computed,
+    batch,
+} from '@preact/signals-core';
 
-import { createRouter } from './router.js';
-import { location } from './location.js';
+import { html, svg } from 'uhtml';
+
+import { defineComponent } from './component.js';
+import { defineStore, store } from './store.js';
+import { effect } from './scope.js';
 import { bus } from './bus.js';
+import { ext } from './ext.js';
 
-const app = {};
+ext.bus = bus;
 
-function exposeState(key) {
-    Object.defineProperty(app, key, {
-        enumerable: true,
-        configurable: true,
+export const Plainly = {
+    defineComponent,
+    defineStore,
+    store,
 
-        get() {
-            return resolveState(key);
-        },
-    });
-}
+    signal,
+    computed,
+    effect,
+    batch,
 
-function register(id, factory) {
-    if (id.includes('-')) {
-        defComponent(id, factory);
-        return;
-    }
+    html,
+    svg,
 
-    defState(id, factory);
-    exposeState(id);
-}
+    bus,
 
-function createAPI() {
-    const $$ = function (id, factory) {
-        if (factory === undefined) {
-            return resolveState(id);
-        }
+    // поля, которые аддоны добавляют в контекст компонентов и сторов
+    ctx: ext,
+};
 
-        return register(id, factory);
-    };
-
-    $$.router = createRouter;
-    $$.location = location;
-    $$.bus = bus;
-    $$.app = app;
-
-    return $$;
-}
-
-export const $$ = createAPI();
-
-window.$$ = $$;
-
+window.Plainly = Plainly;

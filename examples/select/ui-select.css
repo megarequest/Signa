@@ -1,0 +1,122 @@
+ui-select {
+    display: inline-block;
+    min-width: 220px;
+}
+
+.sel {
+    position: relative;
+}
+
+.sel-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    text-align: left;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #ddd);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sel-trigger:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.sel.open .sel-trigger,
+.sel-trigger:focus-visible {
+    border-color: var(--accent, #0090ff);
+    outline: 2px solid color-mix(in srgb, var(--accent, #0090ff) 25%, transparent);
+}
+
+.sel-value {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sel-placeholder {
+    color: var(--muted, #888);
+}
+
+.sel-arrow {
+    color: var(--muted, #888);
+    transition: transform .15s;
+}
+
+.sel.open .sel-arrow {
+    transform: rotate(180deg);
+}
+
+.sel-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 4px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #ddd);
+    border-radius: 8px;
+    box-shadow: var(--shadow, 0 8px 24px rgb(0 0 0 / .12));
+    animation: sel-in .12s ease-out;
+}
+
+@keyframes sel-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+}
+
+.sel-search {
+    width: 100%;
+    margin-bottom: 4px;
+    padding: 6px 8px;
+    border: 1px solid var(--border, #ddd);
+    border-radius: 6px;
+    background: var(--bg, #fafafa);
+}
+
+.sel-list {
+    max-height: 240px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sel-option,
+.sel-empty {
+    padding: 7px 10px;
+    border-radius: 6px;
+}
+
+.sel-option {
+    cursor: pointer;
+}
+
+.sel-option.active {
+    background: var(--accent-soft, #eef);
+}
+
+.sel-option.selected {
+    font-weight: 600;
+}
+
+.sel-option.selected::after {
+    content: " ✓";
+    color: var(--accent, #0090ff);
+}
+
+.sel-option.disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.sel-empty {
+    color: var(--muted, #888);
+}

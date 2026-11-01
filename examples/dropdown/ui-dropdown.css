@@ -1,0 +1,82 @@
+ui-dropdown {
+    display: inline-block;
+}
+
+.dd {
+    position: relative;
+}
+
+.dd-trigger {
+    display: inline-block;
+}
+
+.dd-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    z-index: 10;
+    min-width: 180px;
+    padding: 6px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #ddd);
+    border-radius: 10px;
+    box-shadow: var(--shadow, 0 8px 24px rgb(0 0 0 / .12));
+
+    /* скрыта, но анимируется: visibility вместо display */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .12s, transform .12s, visibility .12s;
+}
+
+.dd-panel.open {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+}
+
+/* мостик над панелью: в hover-режиме курсор не «проваливается» в зазор */
+.dd-panel::before {
+    content: "";
+    position: absolute;
+    inset: -8px 0 auto;
+    height: 8px;
+}
+
+.dd-start {
+    left: 0;
+}
+
+.dd-end {
+    right: 0;
+}
+
+/* типовое меню внутри панели */
+.dd-menu {
+    display: grid;
+}
+
+.dd-menu a,
+.dd-menu button {
+    display: block;
+    width: 100%;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    text-align: left;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dd-menu a:hover,
+.dd-menu button:hover {
+    background: var(--accent-soft, #eef);
+}
+
+.dd-menu hr {
+    width: 100%;
+    margin: 4px 0;
+    border: 0;
+    border-top: 1px solid var(--border, #ddd);
+}
